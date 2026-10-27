@@ -354,6 +354,15 @@ static void run_selftest(void)
     ID3D11Texture2D_Release(staging);
 }
 
+void present_stop(void)
+{
+    if (state != STATE_READY)
+        return;
+    release_resources();
+    state = STATE_IDLE;
+    log_line("dxgi: stopped");
+}
+
 BOOL present_frame(HWND window, BOOL selftest)
 {
     GLint read_fbo, draw_fbo, read_buffer;

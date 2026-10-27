@@ -62,7 +62,8 @@ int main(int argc, char **argv)
     PFNWGLSWAPINTERVALEXTPROC interval = (void *)wglGetProcAddress("wglSwapIntervalEXT");
     if (interval) interval(1);
 
-    for (int frame = 0; frame < 10; frame++) {
+    /* Long enough for the DLL's OpenGL warm-up before DXGI takes over. */
+    for (DWORD start = GetTickCount(); GetTickCount() - start < 2500;) {
         MSG msg;
         while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE)) DispatchMessageA(&msg);
         glDisable(GL_SCISSOR_TEST);

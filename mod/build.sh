@@ -9,7 +9,7 @@ mkdir -p dist build
 i686-w64-mingw32-windres src/version.rc -O coff -o build/version.res \
     -DVERSION_NUM="$VERSION_NUM" -DVERSION_STR="\\\"$VERSION\\\""
 i686-w64-mingw32-gcc -O2 -s -shared -nostdlib -Wall -Wextra \
-    -o dist/version.dll src/borderless.c src/present.c src/version.def build/version.res \
+    -o dist/version.dll src/borderless.c src/present.c src/ui.c src/version.def build/version.res \
     -Wl,--enable-stdcall-fixup -Wl,-e,_DllMain@12 \
     -lkernel32 -luser32
 cp yae_borderless.ini dist/

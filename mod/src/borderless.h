@@ -11,5 +11,16 @@ void log_line(const char *format, ...);
  * driver's SwapBuffers. */
 BOOL present_frame(HWND window, BOOL selftest);
 void present_set_interval(int interval);
+/* Releases the swap chain so the driver's SwapBuffers presents again. Needs
+ * the GL context current. */
+void present_stop(void);
+
+/* Display Mode option in the video settings (ui.c). `patch` replaces one
+ * import of a module and returns the original. */
+void ui_hook_modules(void *(*patch)(HMODULE, const char *, const char *, void *));
+void ui_set_mode(BOOL borderless);
+BOOL ui_mode_borderless(void);
+/* Called by ui.c when OK applies a new Display Mode (borderless.c). */
+void on_display_mode_committed(BOOL borderless);
 
 #endif
