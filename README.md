@@ -116,9 +116,17 @@ release with the matching `CHANGELOG.md` section as notes.
 git tag v1.0.0 && git push origin v1.0.0
 ```
 
-Code signing runs when the repository has two secrets: `SIGNING_PFX_BASE64`
-(an Authenticode certificate, `base64 -w0 cert.pfx`) and
-`SIGNING_PFX_PASSWORD`. Without them, releases are unsigned.
+Releases are unsigned. The workflow has a signing step that runs when the
+repository has two secrets, `SIGNING_PFX_BASE64` (`base64 -w0 cert.pfx`) and
+`SIGNING_PFX_PASSWORD`. Publicly trusted code signing certificates issued
+since mid-2023 keep their key in hardware or a cloud HSM and cannot be
+exported as a PFX, so a trusted signature needs that step replaced with the
+provider's own action:
+
+- [Azure Artifact Signing](https://learn.microsoft.com/azure/artifact-signing/)
+  (paid monthly, identity validation required).
+- [SignPath Foundation](https://signpath.org/) (free for open-source
+  projects; requires a public repository).
 
 ## License
 
