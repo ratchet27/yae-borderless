@@ -1,0 +1,10 @@
+# The repo lives inside the game folder. Game files are not tracked.
+/*
+!/.gitignore
+!/.github/
+!/mod/
+!/CHANGELOG.md
+!/LICENSE
+!/README.md
+/mod/dist/
+/mod/build/

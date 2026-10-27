@@ -1,0 +1,70 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MinGW
+        run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-i686 binutils-mingw-w64-i686 osslsigncode zip
+
+      - name: Version
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = tag ]; then v="${GITHUB_REF_NAME#v}"; else v=0.0.0; fi
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: mod/build.sh
+
+      - name: Build test harness
+        run: i686-w64-mingw32-gcc -O2 -Wall -o mod/build/harness.exe mod/test/harness.c -lversion -lopengl32 -lgdi32
+
+      # Runs only when the repository has the SIGNING_PFX_BASE64 and
+      # SIGNING_PFX_PASSWORD secrets (an Authenticode code signing certificate).
+      - name: Sign
+        env:
+          PFX_BASE64: ${{ secrets.SIGNING_PFX_BASE64 }}
+          PFX_PASSWORD: ${{ secrets.SIGNING_PFX_PASSWORD }}
+        if: env.PFX_BASE64 != ''
+        run: |
+          echo "$PFX_BASE64" | base64 -d > "$RUNNER_TEMP/cert.pfx"
+          osslsigncode sign -pkcs12 "$RUNNER_TEMP/cert.pfx" -pass "$PFX_PASSWORD" \
+            -n "YAE Borderless" -t http://timestamp.digicert.com \
+            -in mod/dist/version.dll -out mod/dist/version.signed.dll
+          mv mod/dist/version.signed.dll mod/dist/version.dll
+          rm "$RUNNER_TEMP/cert.pfx"
+
+      - name: Package
+        run: |
+          name="yae-borderless-${VERSION}"
+          mkdir -p "package/$name"
+          cp mod/dist/version.dll mod/dist/yae_borderless.ini LICENSE README.md CHANGELOG.md "package/$name/"
+          (cd package && zip -r "$name.zip" "$name")
+          (cd package && sha256sum "$name.zip" "$name/version.dll" > SHA256SUMS.txt)
+          echo "PACKAGE=$name" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE }}
+          path: |
+            package/*.zip
+            package/SHA256SUMS.txt
+
+      - name: Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          awk -v v="## ${VERSION}" '$0==v{f=1;next} /^## /{f=0} f' CHANGELOG.md > notes.md
+          gh release create "$GITHUB_REF_NAME" "package/$PACKAGE.zip" package/SHA256SUMS.txt \
+            --title "$PACKAGE" --notes-file notes.md

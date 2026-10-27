@@ -1,0 +1,27 @@
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION VERSION_NUM
+PRODUCTVERSION VERSION_NUM
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_DLL
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "YAE Borderless (community mod)"
+            VALUE "FileDescription", "Borderless fullscreen for You Are Empty: Absolute Edition"
+            VALUE "FileVersion", VERSION_STR
+            VALUE "InternalName", "yae_borderless"
+            VALUE "LegalCopyright", "Copyright (c) 2026 Pavel Lanchev, MIT License"
+            VALUE "OriginalFilename", "version.dll"
+            VALUE "ProductName", "YAE Borderless"
+            VALUE "ProductVersion", VERSION_STR
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
